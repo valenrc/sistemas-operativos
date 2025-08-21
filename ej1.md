@@ -26,4 +26,12 @@ Ejemplo: "Linux pc67 6.14.0-27-generic #27~24.04.1-Ubuntu SMP PREEMPT_DYNAMIC Tu
 da los UID de los grupos y usuarios reales y efectivos. Un grupo es un grupo de usuarios. 
 
 ## ps
-da un snapshot de *algunos* procesos actuales	. Con el flag -e lista todos. 
+da un snapshot de *una seleccion* de procesos actuales.
+Por defecto selecciona todos los procesos que tengan el mismo USERID que el usuario y que estén "asociados" con la misma terminal que el "invoker". (???)
+Para cada proceso muestra su Process ID (PID)
+
+Con el flag -e lista todos los procesos en el sistema. 
+
+## top
+Es como el admin. de tareas de windows. 
+Es una interfaz que muestra los procesos del sistema manejados por el s.o. en tiempo real
