@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <string.h>
 
 int main(void){
   int server_socket;
@@ -22,21 +23,23 @@ int main(void){
     exit(EXIT_FAILURE);
   }    // devuelve 0 si la conexión se realiza
 
-  // escribo mi pid
-  write(server_socket, &pid, sizeof(pid));
-  printf("Ciente[%d] mande pid al servidor\n", pid);
-  
   char msg[100];
-  printf("Mensaje: "); scanf("%s", msg);
+  char exit_msg[] = "exit";
 
-  if(write(server_socket, &msg, sizeof(msg)) == -1){
-    perror("Error WRITE");
-    exit(EXIT_FAILURE);
+  while(1){
+    //printf("Mensaje: ");
+    scanf("%s", msg);
+    if(write(server_socket, &pid, sizeof(pid)) == -1){
+      perror("WRITE ERROR PID");
+      exit(EXIT_FAILURE);
+    }
+    if(write(server_socket, &msg, sizeof(msg)) == -1){
+      perror("WRITE ERROR MSG");
+      exit(EXIT_FAILURE);
+    }
+
+    if(strcmp(msg, exit_msg) == 0) break;
   }
-  printf("Ciente[%d] mande mensaje %s al servidor\n", pid, msg);
-
-
-  
 
   close(server_socket);
   exit(0);

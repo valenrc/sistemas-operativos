@@ -7,30 +7,11 @@
 #include <sys/un.h>
 #include <string.h>
 
-int main(void){
-  int server_socket;
-  int client_socket;
-  struct sockaddr_un server_addr;
-  struct sockaddr_un client_addr;
-  int slen = sizeof(server_addr);
-  int clen = sizeof(client_addr);
+int client_socket;
 
-  // configurar la dirección del server
-  server_addr.sun_family = AF_UNIX;
-  strcpy(server_addr.sun_path, "unix_socket");
-  unlink(server_addr.sun_path);
-
-  // crear el socket, bind y listen
-  server_socket = socket(AF_UNIX, SOCK_STREAM, 0);
-  bind(server_socket, (struct sockaddr *) &server_addr, slen);
-  listen(server_socket, 5);
-
+void subrutina_server(){
   char term[] = "exit";
   char msg[100];
-
-  printf("esperando conexión...\n");
-  // se bloquea esperando una conexión
-  client_socket = accept(server_socket, (struct sockaddr *) &client_addr, &clen);
 
   while(strcmp(msg, term) != 0){
     if(client_socket == -1){
@@ -52,5 +33,38 @@ int main(void){
   }
   printf("El cliente terminó la conexión\n");
   close(client_socket);
+  exit(0);
+}
+
+int main(void){
+  int server_socket;
+  struct sockaddr_un server_addr;
+  struct sockaddr_un client_addr;
+  int slen = sizeof(server_addr);
+  int clen = sizeof(client_addr);
+
+  // configurar la dirección del server
+  server_addr.sun_family = AF_UNIX;
+  strcpy(server_addr.sun_path, "unix_socket");
+  unlink(server_addr.sun_path);
+
+  // crear el socket, bind y listen
+  server_socket = socket(AF_UNIX, SOCK_STREAM, 0);
+  bind(server_socket, (struct sockaddr *) &server_addr, slen);
+  listen(server_socket, 5);
+
+  char term[] = "exit";
+  char msg[100];
+
+  printf("esperando conexión...\n");
+  // se bloquea esperando una conexión
+  while(1){
+    client_socket = accept(server_socket, (struct sockaddr *) &client_addr, &clen);
+    pid_t pid = fork();
+
+    if(pid == 0){
+      subrutina_server();
+    }
+  }
   exit(0);
 }
