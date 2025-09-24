@@ -8,28 +8,27 @@
 #include <string.h>
 
 int client_socket;
+typedef struct msgpck{
+  char msg[100];
+  pid_t pid;
+} msg_paquete;
 
 void subrutina_server(){
   char term[] = "exit";
-  char msg[100];
+  msg_paquete msgp;
 
-  while(strcmp(msg, term) != 0){
+  while(strcmp(msgp.msg, term) != 0){
     if(client_socket == -1){
       perror("ERROR ACCEPT");
       exit(EXIT_FAILURE);
     }
 
-    int client_pid;
-    if(read(client_socket, &client_pid, sizeof(client_pid)) == -1){
-      perror("ERROR READ 1");
-      exit(EXIT_FAILURE);
-    }
-    if(read(client_socket, &msg, sizeof(msg)) == -1){
-      perror("ERROR READ 2");
-      exit(EXIT_FAILURE);
+    if(read(client_socket, &msgp, sizeof(msgp)) == -1){
+      perror("ERROR READ");
+      exit(1);
     }
 
-    printf("Cliente con pid: %d - Mensaje: '%s'\n", client_pid, msg);
+    printf("Cliente con pid: %d - Mensaje: '%s'\n", msgp.pid, msgp.msg);
   }
   printf("El cliente terminó la conexión\n");
   close(client_socket);
@@ -64,6 +63,8 @@ int main(void){
 
     if(pid == 0){
       subrutina_server();
+    }else{
+      close(client_socket); // cerrar el fd del socket del cliente
     }
   }
   exit(0);

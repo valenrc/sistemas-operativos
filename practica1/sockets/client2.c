@@ -7,6 +7,11 @@
 #include <sys/un.h>
 #include <string.h>
 
+typedef struct msgpck{
+  char msg[100];
+  pid_t pid;
+} msg_paquete;
+
 int main(void){
   int server_socket;
   int pid = getpid();
@@ -28,13 +33,16 @@ int main(void){
 
   while(1){
     //printf("Mensaje: ");
-    scanf("%s", msg);
-    if(write(server_socket, &pid, sizeof(pid)) == -1){
-      perror("WRITE ERROR PID");
-      exit(EXIT_FAILURE);
-    }
-    if(write(server_socket, &msg, sizeof(msg)) == -1){
-      perror("WRITE ERROR MSG");
+    if(fgets(msg, sizeof(msg), stdin) == NULL) break; // uso fgets en lugar de scanf
+    // le saco el "\n" del final
+    size_t len = strlen(msg);
+    if(len > 0 && msg[len-1] == '\n') msg[len-1] = '\0';
+
+    msg_paquete msgp = {.pid = pid};
+    strcpy(msgp.msg, msg);
+
+    if(write(server_socket, &msgp, sizeof(msgp)) == -1){
+      perror("WRITE ERROR");
       exit(EXIT_FAILURE);
     }
 
